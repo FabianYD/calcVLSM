@@ -39,6 +39,7 @@ public class Subred extends Red {
         return broadcast;
     }
 
+    @Override
     public String imprimir() {
         String nombre= "\n";
         if(this.hostAsignado != null)

@@ -15,11 +15,16 @@ public class Calculadora {
     private Red redPrincipal;
     private List<Host> hosts;
     private List<Subred> subredes;
+    private String[][] resultados;
 
     public Calculadora(String direccionBase, int mascaraBase) throws Exception {
         this.redPrincipal = new Red(direccionBase, mascaraBase);
         this.hosts = new ArrayList<>();
         this.subredes = new ArrayList<>();
+    }
+
+    public Red getRedPrincipal() {
+        return redPrincipal;
     }
 
     public void agregarHost(String nombre, int numHosts) {
@@ -50,13 +55,18 @@ public class Calculadora {
     }
 
     public void calcular() throws Exception {
+
         // Ordenar hosts de mayor a menor
         hosts.sort((a, b) -> b.getNumHost() - a.getNumHost());
         
         String direccionActual = redPrincipal.getIpv4Binario();
         int prefijoActual = redPrincipal.getPrefijo();
         
-        for (Host hostActual : hosts) {
+        // Crear el array de resultados con el tamaño de hosts
+        resultados = new String[hosts.size()][4];
+        
+        for (int i = 0; i < hosts.size(); i++) {
+            Host hostActual = hosts.get(i);
             int bitsHost = hostActual.getPotencia();            
             int mascaraSubred = 32 - bitsHost;
             int bitsRestantes = mascaraSubred - prefijoActual;
@@ -85,6 +95,12 @@ public class Calculadora {
             String broadcastBinaria = redBinaria + "1".repeat(bitsHost);
             String broadcastFormateada = Convertir.formatearBinario(broadcastBinaria);
             String broadcast = Convertir.IPv4(broadcastFormateada);
+            
+            // Guardar resultados
+            resultados[i][0] = direccionRed+"/"+mascaraSubred;
+            resultados[i][1] = primeraUsable;
+            resultados[i][2] = ultimaUsable;
+            resultados[i][3] = broadcast;
             
             // Manejar la subred principal
             manejarSubredDuplicada(direccionRed, mascaraSubred, hostActual.getNombre(), 
@@ -115,6 +131,7 @@ public class Calculadora {
 
         // Ordenar subredes de menor a mayor
         subredes.sort((a, b) -> a.getIpv4().compareTo(b.getIpv4()));
+        // return resultados;
     }
     
     private String incrementarBinario(String binario) {
@@ -135,6 +152,40 @@ public class Calculadora {
             sb.append(subred.imprimir());
             sb.append("\n\n");
         }
+        return sb.toString();
+    }
+
+    public String imprimirHosts() {
+        StringBuilder sb = new StringBuilder();
+        for (Host host : hosts) {
+            sb.append(host.imprimir());
+            sb.append("<br>");
+        }
+        return sb.toString();
+    }
+
+    public String verResultados() {
+        if (resultados == null || resultados.length == 0) {
+            return "";
+        }
+        
+        StringBuilder sb = new StringBuilder();
+        sb.append("<table class='table table-striped'>");
+        sb.append("<thead><tr>");
+        sb.append("<th>Red</th><th>Primera Utilizable</th><th>Última Utilizable</th><th>Broadcast</th>");
+        sb.append("</tr></thead><tbody>");
+        
+        for (String[] row : resultados) {
+            if (row != null) {
+                sb.append("<tr>");
+                for (String cell : row) {
+                    sb.append("<td>").append(cell != null ? cell : "").append("</td>");
+                }
+                sb.append("</tr>");
+            }
+        }
+        
+        sb.append("</tbody></table>");
         return sb.toString();
     }
 }

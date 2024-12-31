@@ -29,10 +29,6 @@ public class Red {
         return ipv4;
     }
 
-    public String getIp() {
-        return ipv4;
-    }
-
     public int getPrefijo() {
         return prefijo;
     }

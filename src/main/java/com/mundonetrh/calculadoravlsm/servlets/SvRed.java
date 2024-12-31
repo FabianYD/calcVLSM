@@ -5,7 +5,6 @@
 package com.mundonetrh.calculadoravlsm.servlets;
 
 import java.io.IOException;
-import java.io.PrintWriter;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
@@ -13,7 +12,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
-import calculadora.Red;
+import calculadora.Calculadora;
 
 /**
  *
@@ -48,40 +47,23 @@ public class SvRed extends HttpServlet {
             // Obtener dirección base y máscara
             String direccionBase = request.getParameter("direccionBase");
             int mascaraBase = Integer.parseInt(request.getParameter("mascaraBase"));
-
-            // Obtener arrays de nombres y números de hosts
             String[] nombresHost = request.getParameterValues("nombreHost[]");
-            String[] numHostsStr = request.getParameterValues("numHosts[]");
+            String[] numHost = request.getParameterValues("numHosts[]");
+            Calculadora calc = new Calculadora(direccionBase, mascaraBase);
 
-            Red red = new Red(direccionBase, mascaraBase);
-            HttpSession session = request.getSession();
-            session.setAttribute("red", red.imprimir());
-            // session.setAttribute("nombresHost", nombresHost);
-            // session.setAttribute("numHostsStr", numHostsStr);
-            response.sendRedirect("index.jsp");
-
-            // Convertir array de números de hosts a enteros
-            /* int[] numHosts = new int[numHostsStr.length];
-            for (int i = 0; i < numHostsStr.length; i++) {
-                numHosts[i] = Integer.parseInt(numHostsStr[i]);
+            for (int i = 0; i < numHost.length; i++) {
+                calc.agregarHost(nombresHost[i], Integer.parseInt(numHost[i]));
             }
 
-            // Imprimir los datos recibidos (para depuración)
-            System.out.println("Dirección Base: " + direccionBase);
-            System.out.println("Máscara Base: " + mascaraBase);
-            System.out.println("\nHosts recibidos:");
-            for (int i = 0; i < nombresHost.length; i++) {
-                System.out.println("LAN: " + nombresHost[i] + ", Hosts requeridos: " + numHosts[i]);
-            } */
+            calc.calcular();
 
-            // Aquí puedes crear tu objeto Calculadora y procesar los datos
-            // Calculadora calc = new Calculadora(direccionBase, mascaraBase);
-            // for (int i = 0; i < nombresHost.length; i++) {
-            //     calc.agregarHost(nombresHost[i], numHosts[i]);
-            // }
-            // Subred[] resultado = calc.calcular();
+            String redP = calc.getRedPrincipal().getIpv4() == null ? "" : calc.getRedPrincipal().getIpv4();
+            HttpSession session = request.getSession();
+            session.setAttribute("red", redP);
+            session.setAttribute("subredes", calc.imprimirHosts());
+            session.setAttribute("resultados", calc.verResultados());
 
-            // TODO: Enviar el resultado a una página JSP para mostrarlo
+            response.sendRedirect("index.jsp");
             
         } catch (Exception e) {
             // Manejar errores
@@ -94,5 +76,7 @@ public class SvRed extends HttpServlet {
     public String getServletInfo() {
         return "Short description";
     }// </editor-fold>
+
+
 
 }

@@ -1,1 +1,7 @@
+calculadora\Host.class
+calculadora\Convertir.class
+calculadora\Calculadora.class
+com\mundonetrh\calculadoravlsm\servlets\SvRed.class
+calculadora\Red.class
 com\mundonetrh\calculadoravlsm\JakartaRestConfiguration.class
+calculadora\Subred.class
