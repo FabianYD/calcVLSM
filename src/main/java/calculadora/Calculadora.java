@@ -63,7 +63,7 @@ public class Calculadora {
         int prefijoActual = redPrincipal.getPrefijo();
         
         // Crear el array de resultados con el tamaño de hosts
-        resultados = new String[hosts.size()][4];
+        resultados = new String[hosts.size()][5];
         
         for (int i = 0; i < hosts.size(); i++) {
             Host hostActual = hosts.get(i);
@@ -97,10 +97,11 @@ public class Calculadora {
             String broadcast = Convertir.IPv4(broadcastFormateada);
             
             // Guardar resultados
-            resultados[i][0] = direccionRed+"/"+mascaraSubred;
-            resultados[i][1] = primeraUsable;
-            resultados[i][2] = ultimaUsable;
-            resultados[i][3] = broadcast;
+            resultados[i][0] = hostActual.getNombre();
+            resultados[i][1] = direccionRed+"/"+mascaraSubred;
+            resultados[i][2] = primeraUsable;
+            resultados[i][3] = ultimaUsable;
+            resultados[i][4] = broadcast;
             
             // Manejar la subred principal
             manejarSubredDuplicada(direccionRed, mascaraSubred, hostActual.getNombre(), 
@@ -150,17 +151,23 @@ public class Calculadora {
         StringBuilder sb = new StringBuilder();
         for (Subred subred : subredes) {
             sb.append(subred.imprimir());
-            sb.append("\n\n");
+            sb.append("<br>");
         }
         return sb.toString();
     }
 
     public String imprimirHosts() {
         StringBuilder sb = new StringBuilder();
+        sb.append("<table class='table table-striped'>");
+        sb.append("<thead><tr>");
+        sb.append("<th>Nombre</th><th>Hosts</th><th>Potencia</th>");
+        sb.append("</tr></thead><tbody>");
+        
         for (Host host : hosts) {
             sb.append(host.imprimir());
-            sb.append("<br>");
         }
+        
+        sb.append("</tbody></table>");
         return sb.toString();
     }
 
@@ -172,7 +179,7 @@ public class Calculadora {
         StringBuilder sb = new StringBuilder();
         sb.append("<table class='table table-striped'>");
         sb.append("<thead><tr>");
-        sb.append("<th>Red</th><th>Primera Utilizable</th><th>Última Utilizable</th><th>Broadcast</th>");
+        sb.append("<th>Nombre</th><th>Red</th><th>Primera Utilizable</th><th>Última Utilizable</th><th>Broadcast</th>");
         sb.append("</tr></thead><tbody>");
         
         for (String[] row : resultados) {

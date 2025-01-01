@@ -57,11 +57,12 @@ public class SvRed extends HttpServlet {
 
             calc.calcular();
 
-            String redP = calc.getRedPrincipal().getIpv4() == null ? "" : calc.getRedPrincipal().getIpv4();
+            String redP = calc.getRedPrincipal().getIpv4() + "/" + calc.getRedPrincipal().getPrefijo();
             HttpSession session = request.getSession();
             session.setAttribute("red", redP);
-            session.setAttribute("subredes", calc.imprimirHosts());
+            session.setAttribute("subredes", calc.imprimirSubredes());
             session.setAttribute("resultados", calc.verResultados());
+            session.setAttribute("hosts", calc.imprimirHosts());
 
             response.sendRedirect("index.jsp");
             

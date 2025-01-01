@@ -1,0 +1,268 @@
+:root {
+    --primary-color: #8b5cf6;
+    --secondary-color: #6366f1;
+    --accent-color: #f472b6;
+    --background-color: #f8fafc;
+    --card-background: #ffffff;
+    --text-primary: #1e293b;
+    --text-secondary: #64748b;
+    --success-color: #22c55e;
+    --danger-color: #ef4444;
+}
+
+body {
+    background: var(--background-color);
+    padding-bottom: 100px;
+    min-height: 100vh;
+    color: var(--text-primary);
+    font-family: 'Inter', sans-serif;
+}
+
+.container {
+    max-width: 1400px;
+}
+
+h1 {
+    color: var(--text-primary);
+    font-weight: 700;
+    text-shadow: none;
+    margin-bottom: 2rem;
+    font-size: 2.5rem;
+}
+
+.card {
+    background: var(--card-background);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    border: none;
+    border-radius: 16px;
+    overflow: hidden;
+    transition: all 0.3s ease;
+}
+
+.card:hover {
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    transform: translateY(-2px);
+}
+
+.card-header {
+    background: var(--card-background);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+    padding: 1.5rem;
+}
+
+.card-header h5 {
+    color: var(--text-primary);
+    font-weight: 600;
+    font-size: 1.25rem;
+    margin: 0;
+}
+
+.form-label {
+    color: var(--text-secondary);
+    font-weight: 500;
+    font-size: 0.875rem;
+    margin-bottom: 0.5rem;
+}
+
+.form-control {
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 0.75rem 1rem;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+    background: var(--card-background);
+    color: var(--text-primary);
+}
+
+.form-control:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.1);
+}
+
+.btn {
+    padding: 0.75rem 1.5rem;
+    border-radius: 12px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    text-transform: none;
+    letter-spacing: 0;
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+    border: none;
+}
+
+.btn-light {
+    background: var(--card-background);
+    border: 1px solid #e2e8f0;
+    color: var(--text-primary);
+}
+
+.btn-danger {
+    background: var(--danger-color);
+    border: none;
+}
+
+.host-entry {
+    background: var(--card-background);
+    border-radius: 12px;
+    padding: 0.75rem;
+    margin-bottom: 0.75rem;
+    border: 1px solid #e2e8f0;
+    transition: all 0.3s ease;
+}
+
+.host-entry:hover {
+    box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+}
+
+.host-entry .row {
+    align-items: center;
+}
+
+.host-entry:first-child {
+    margin-top: 0.5rem;
+}
+
+.resultado-item {
+    background: var(--card-background);
+    padding: 1.5rem;
+    border-radius: 16px;
+    margin-bottom: 1.5rem;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+    border: 1px solid #e2e8f0;
+}
+
+.resultado-item:hover {
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+}
+
+.resultado-item h5 {
+    color: var(--text-primary);
+    font-weight: 600;
+    font-size: 1.1rem;
+    margin-bottom: 1.25rem;
+    display: flex;
+    align-items: center;
+}
+
+.resultado-item.red {
+    border-left: 4px solid var(--primary-color);
+}
+
+.resultado-item.hosts {
+    border-left: 4px solid var(--success-color);
+}
+
+.resultado-item.detalles {
+    border-left: 4px solid var(--secondary-color);
+}
+
+.resultado-item.subredes {
+    border-left: 4px solid var(--accent-color);
+}
+
+.resultado-contenido {
+    color: var(--text-secondary);
+    font-size: 1rem;
+    line-height: 1.6;
+}
+
+.footer {
+    background: black;
+    color: white;
+    padding: 1.25rem 0;
+    position: fixed;
+    bottom: 0;
+    width: 100%;
+    box-shadow: 0 -4px 6px -1px rgba(0, 0, 0, 0.1);
+    z-index: 1000;
+}
+
+.footer p {
+    margin: 0;
+    text-align: center;
+    opacity: 0.9;
+}
+
+.footer .creador {
+    font-size: 1rem;
+    font-weight: 500;
+}
+
+.footer .universidad {
+    font-size: 0.875rem;
+    margin-top: 0.25rem;
+    opacity: 0.7;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.card, .resultado-item {
+    animation: fadeIn 0.5s ease-out forwards;
+}
+
+.bi {
+    color: inherit;
+    margin-right: 0.5rem;
+}
+
+/* Estilos para el botón de agregar host */
+.btn-add-subnet {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 16px;
+    background-color: rgba(139, 92, 246, 0.03);
+    border: none;
+    border-radius: 8px;
+    color: var(--primary-color);
+    font-weight: 500;
+    transition: all 0.3s ease;
+    margin-top: 1rem;
+    animation: pulsate 2s ease-in-out infinite;
+}
+
+.btn-add-subnet:hover {
+    color: var(--primary-color);
+    background-color: rgba(139, 92, 246, 0.05);
+    transform: translateY(-2px);
+    animation: none;
+}
+
+.btn-add-subnet i {
+    font-size: 1.2rem;
+    transition: transform 0.3s ease;
+}
+
+/* Animación de palpitación para todo el botón */
+@keyframes pulsate {
+    0% {
+        transform: scale(1);
+        opacity: 1;
+    }
+    50% {
+        transform: scale(1.05);
+        opacity: 0.8;
+    }
+    100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+/* Animación de pulso para el ícono en hover */
+@keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.2); }
+    100% { transform: scale(1); }
+}
+
+.btn-add-subnet:hover i {
+    animation: pulse 1s ease infinite;
+}

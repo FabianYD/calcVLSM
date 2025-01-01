@@ -44,10 +44,12 @@ public class Host {
         return resultado;
     }
 
-    public String imprimir() {
-        return "NombreHost: " + nombre + "\n" +
-               "numHost: " + numHost + "\n" +
-               "Potencia: 2^" + potencia + "\n";
+    public String imprimir() {//para la web representar en tabla
+        return "<tr>" +
+               "<td>" + nombre + "</td>" +
+               "<td>" + numHost + "</td>" +
+               "<td>2^" + potencia + "</td>" +
+               "</tr>";
     }
 }
 

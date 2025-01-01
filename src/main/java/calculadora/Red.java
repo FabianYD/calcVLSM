@@ -65,7 +65,7 @@ public class Red {
     }
 
     public String imprimir() {
-        return "Red: " + ipv4 + "/" + prefijo + "\nMáscara: " + mascara + "\nIPv4 en binario: " + ipv4Binario;
+        return Convertir.formatearBinario(ipv4Binario) + " -> " + ipv4 + "/" + prefijo;
     }
 
 }
