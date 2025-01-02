@@ -5,7 +5,9 @@
 package calculadora;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  *
@@ -16,6 +18,7 @@ public class Calculadora {
     private List<Host> hosts;
     private List<Subred> subredes;
     private String[][] resultados;
+    private Map<Integer, Integer> prefijoDisponible;
 
     public Calculadora(String direccionBase, int mascaraBase) throws Exception {
         this.redPrincipal = new Red(direccionBase, mascaraBase);
@@ -35,106 +38,123 @@ public class Calculadora {
         return subredes;
     }
 
-    private void manejarSubredDuplicada(String ipv4, int prefijo, String hostAsignado, 
-            String primeraUsable, String ultimaUsable, String broadcast) throws Exception {
+    private void manejarSubredDuplicada(String ipv4, int prefijo, String hostAsignado,
+            String primeraUsable, String ultimaUsable, String broadcast, Map<Integer, Integer> disponibilidad)
+            throws Exception {
         // Buscar si existe una subred con la misma IP y prefijo
         for (int i = 0; i < subredes.size(); i++) {
             Subred subred = subredes.get(i);
             if (subred.getIpv4().equals(ipv4) && subred.getPrefijo() == prefijo) {
                 // Si la subred existente no tiene nombre y la nueva sí, reemplazarla
                 if (subred.getHostAsignado() == null && hostAsignado != null) {
-                    subredes.set(i, new Subred(ipv4, prefijo, hostAsignado, 
-                        primeraUsable, ultimaUsable, broadcast));
+                    subredes.set(i, new Subred(ipv4, prefijo, hostAsignado,
+                            primeraUsable, ultimaUsable, broadcast));
+                    int auxDisp = disponibilidad.get(prefijo);
+                    disponibilidad.replace(prefijo, auxDisp - 1);
+
                 }
                 return;
             }
         }
         // Si no existe, agregar la nueva subred
-        subredes.add(new Subred(ipv4, prefijo, hostAsignado, 
-            primeraUsable, ultimaUsable, broadcast));
+        subredes.add(new Subred(ipv4, prefijo, hostAsignado,
+                primeraUsable, ultimaUsable, broadcast));
     }
 
     public void calcular() throws Exception {
-
+        prefijoDisponible = new HashMap<>();
         // Ordenar hosts de mayor a menor
         hosts.sort((a, b) -> b.getNumHost() - a.getNumHost());
-        
+
         String direccionActual = redPrincipal.getIpv4Binario();
         int prefijoActual = redPrincipal.getPrefijo();
-        
+
         // Crear el array de resultados con el tamaño de hosts
         resultados = new String[hosts.size()][5];
-        
+
         for (int i = 0; i < hosts.size(); i++) {
             Host hostActual = hosts.get(i);
-            int bitsHost = hostActual.getPotencia();            
+            int bitsHost = hostActual.getPotencia();
             int mascaraSubred = 32 - bitsHost;
             int bitsRestantes = mascaraSubred - prefijoActual;
             int numSubredesPosibles = (int) Math.pow(2, bitsRestantes);
-            
+
+            // agregar mascaraSubred y disponibilidad numSubredesPosibles en MAP
+            prefijoDisponible.put(mascaraSubred, numSubredesPosibles - 1);
+
             // Obtener parte de red y calcular dirección
             String redBinaria = direccionActual.substring(0, mascaraSubred);
             String hostBinario = "0".repeat(32 - mascaraSubred);
-            
+
             // Dirección de red
             String direccionRedBinaria = redBinaria + hostBinario;
             String direccionRedFormateada = Convertir.formatearBinario(direccionRedBinaria);
             String direccionRed = Convertir.IPv4(direccionRedFormateada);
-            
+
             // Primera dirección utilizable
             String primeraUsableBinaria = redBinaria + "0".repeat(bitsHost - 1) + "1";
             String primeraUsableFormateada = Convertir.formatearBinario(primeraUsableBinaria);
             String primeraUsable = Convertir.IPv4(primeraUsableFormateada);
-            
+
             // Última dirección utilizable
             String ultimaUsableBinaria = redBinaria + "1".repeat(bitsHost - 1) + "0";
             String ultimaUsableFormateada = Convertir.formatearBinario(ultimaUsableBinaria);
             String ultimaUsable = Convertir.IPv4(ultimaUsableFormateada);
-            
+
             // Dirección de broadcast
             String broadcastBinaria = redBinaria + "1".repeat(bitsHost);
             String broadcastFormateada = Convertir.formatearBinario(broadcastBinaria);
             String broadcast = Convertir.IPv4(broadcastFormateada);
-            
+
             // Guardar resultados
             resultados[i][0] = hostActual.getNombre();
-            resultados[i][1] = direccionRed+"/"+mascaraSubred;
+            resultados[i][1] = direccionRed + "/" + mascaraSubred;
             resultados[i][2] = primeraUsable;
             resultados[i][3] = ultimaUsable;
             resultados[i][4] = broadcast;
-            
+
             // Manejar la subred principal
-            manejarSubredDuplicada(direccionRed, mascaraSubred, hostActual.getNombre(), 
-                primeraUsable, ultimaUsable, broadcast);
-            
+            manejarSubredDuplicada(direccionRed, mascaraSubred, hostActual.getNombre(),
+                    primeraUsable, ultimaUsable, broadcast, prefijoDisponible);
+
             // Calcular combinaciones posibles
             if (bitsRestantes > 0) {
                 String redBase = direccionActual.substring(0, prefijoActual);
-                
+
                 for (int j = 1; j < numSubredesPosibles; j++) {
-                    String subredBinaria = String.format("%" + bitsRestantes + "s", 
-                        Integer.toBinaryString(j)).replace(' ', '0');
+                    String subredBinaria = String.format("%" + bitsRestantes + "s",
+                            Integer.toBinaryString(j)).replace(' ', '0');
                     String hostsParte = "0".repeat(bitsHost);
                     String direccionCompletaBinaria = redBase + subredBinaria + hostsParte;
-                    
+
                     String direccionFormateada = Convertir.formatearBinario(direccionCompletaBinaria);
                     String direccionIPCombi = Convertir.IPv4(direccionFormateada);
                     // Manejar las subredes combinadas
-                    manejarSubredDuplicada(direccionIPCombi, mascaraSubred, null, 
-                        null, null, null);
+                    manejarSubredDuplicada(direccionIPCombi, mascaraSubred, null,
+                            null, null, null, prefijoDisponible);
                 }
             }
-            
+
             // Actualizar para la siguiente iteración
-            prefijoActual = mascaraSubred;
+            if (prefijoDisponible.get(mascaraSubred) == -1) {
+                prefijoDisponible.remove(mascaraSubred);
+                prefijoActual = mascaraSubred - 1;
+            } else {
+                prefijoActual = mascaraSubred;
+            }
             direccionActual = incrementarBinario(broadcastBinaria);
         }
 
-        // Ordenar subredes de menor a mayor
-        subredes.sort((a, b) -> a.getIpv4().compareTo(b.getIpv4()));
+        // Ordenar subredes usando la representación binaria
+        subredes.sort((a, b) -> {
+            
+                String binarioA = Convertir.Binario(a.getIpv4());
+                String binarioB = Convertir.Binario(b.getIpv4());
+                return binarioA.compareTo(binarioB);
+        });
         // return resultados;
     }
-    
+
     private String incrementarBinario(String binario) {
         char[] bits = binario.toCharArray();
         for (int i = bits.length - 1; i >= 0; i--) {
@@ -162,11 +182,11 @@ public class Calculadora {
         sb.append("<thead><tr>");
         sb.append("<th>Nombre</th><th>Hosts</th><th>Potencia</th>");
         sb.append("</tr></thead><tbody>");
-        
+
         for (Host host : hosts) {
             sb.append(host.imprimir());
         }
-        
+
         sb.append("</tbody></table>");
         return sb.toString();
     }
@@ -175,13 +195,13 @@ public class Calculadora {
         if (resultados == null || resultados.length == 0) {
             return "";
         }
-        
+
         StringBuilder sb = new StringBuilder();
         sb.append("<table class='table table-striped'>");
         sb.append("<thead><tr>");
         sb.append("<th>Nombre</th><th>Red</th><th>Primera Utilizable</th><th>Última Utilizable</th><th>Broadcast</th>");
         sb.append("</tr></thead><tbody>");
-        
+
         for (String[] row : resultados) {
             if (row != null) {
                 sb.append("<tr>");
@@ -191,7 +211,7 @@ public class Calculadora {
                 sb.append("</tr>");
             }
         }
-        
+
         sb.append("</tbody></table>");
         return sb.toString();
     }
