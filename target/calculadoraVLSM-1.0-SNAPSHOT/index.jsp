@@ -128,12 +128,28 @@
                     
                     <!-- Procedimiento -->
                     <div class="resultado-item detalles">
-                        <h5>
-                            <i class="bi bi-list-check me-2"></i>
-                            Procedimiento Detallado
-                        </h5>
-                        <div class="resultado-contenido">
-                            <%= request.getSession().getAttribute("subredes") %>
+                            <h5>
+                                <i class="bi bi-list-check me-2"></i>
+                                Procedimiento Detallado
+                            </h5>
+                            <div class="resultado-contenido">
+                            <div class="d-flex gap-3 mb-3">
+                                <div class="d-flex align-items-center">
+                                    <div style="width: 20px; height: 20px; background-color: #e3f2fd; margin-right: 5px;"></div>
+                                    <b>RED</b>
+                                </div>
+                                <div class="d-flex align-items-center">
+                                    <div style="width: 20px; height: 20px; background-color: #ffebee; margin-right: 5px;"></div>
+                                    <b>SUBRED</b>
+                                </div>
+                                <div class="d-flex align-items-center">
+                                    <div style="width: 20px; height: 20px; background-color: #f1f8e9; margin-right: 5px;"></div>
+                                    <b>HOST</b>
+                                </div>
+                            </div>
+                            <div id="procedimiento">
+                                <%= request.getSession().getAttribute("subredes") %>
+                            </div>
                         </div>
                     </div>
                 </div>

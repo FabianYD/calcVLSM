@@ -39,7 +39,7 @@ public class Calculadora {
     }
 
     private void manejarSubredDuplicada(String ipv4, int prefijo, String hostAsignado,
-            String primeraUsable, String ultimaUsable, String broadcast, Map<Integer, Integer> disponibilidad)
+            String primeraUsable, String ultimaUsable, String broadcast, Map<Integer, Integer> disponibilidad, int bitsRestantes)
             throws Exception {
         // Buscar si existe una subred con la misma IP y prefijo
         for (int i = 0; i < subredes.size(); i++) {
@@ -48,7 +48,7 @@ public class Calculadora {
                 // Si la subred existente no tiene nombre y la nueva sí, reemplazarla
                 if (subred.getHostAsignado() == null && hostAsignado != null) {
                     subredes.set(i, new Subred(ipv4, prefijo, hostAsignado,
-                            primeraUsable, ultimaUsable, broadcast));
+                            primeraUsable, ultimaUsable, broadcast, bitsRestantes));
                     int auxDisp = disponibilidad.get(prefijo);
                     disponibilidad.replace(prefijo, auxDisp - 1);
 
@@ -58,7 +58,7 @@ public class Calculadora {
         }
         // Si no existe, agregar la nueva subred
         subredes.add(new Subred(ipv4, prefijo, hostAsignado,
-                primeraUsable, ultimaUsable, broadcast));
+                primeraUsable, ultimaUsable, broadcast, bitsRestantes));
     }
 
     public void calcular() throws Exception {
@@ -115,7 +115,7 @@ public class Calculadora {
 
             // Manejar la subred principal
             manejarSubredDuplicada(direccionRed, mascaraSubred, hostActual.getNombre(),
-                    primeraUsable, ultimaUsable, broadcast, prefijoDisponible);
+                    primeraUsable, ultimaUsable, broadcast, prefijoDisponible, bitsRestantes);
 
             // Calcular combinaciones posibles
             if (bitsRestantes > 0) {
@@ -131,7 +131,7 @@ public class Calculadora {
                     String direccionIPCombi = Convertir.IPv4(direccionFormateada);
                     // Manejar las subredes combinadas
                     manejarSubredDuplicada(direccionIPCombi, mascaraSubred, null,
-                            null, null, null, prefijoDisponible);
+                            null, null, null, prefijoDisponible, bitsRestantes);
                 }
             }
 
@@ -146,12 +146,7 @@ public class Calculadora {
         }
 
         // Ordenar subredes usando la representación binaria
-        subredes.sort((a, b) -> {
-            
-                String binarioA = Convertir.Binario(a.getIpv4());
-                String binarioB = Convertir.Binario(b.getIpv4());
-                return binarioA.compareTo(binarioB);
-        });
+        subredes.sort((a, b) -> Convertir.Binario(a.getIpv4()).compareTo(Convertir.Binario(b.getIpv4())));
         // return resultados;
     }
 
@@ -170,8 +165,42 @@ public class Calculadora {
     public String imprimirSubredes() {
         StringBuilder sb = new StringBuilder();
         for (Subred subred : subredes) {
-            sb.append(subred.imprimir());
-            sb.append("<br>");
+            try {
+                String binario = Convertir.Binario(subred.getIpv4());
+                int prefijo = subred.getPrefijo();
+                int bitsRestantes = subred.getBitsRestantes();
+                
+                // Dividir el binario en tres partes
+                int inicioRed = 0;
+                int finRed = prefijo - bitsRestantes;  // Fin de la parte de red principal
+                int finRestantes = prefijo;            // Fin de los bits restantes
+                
+                String redPart = binario.substring(inicioRed, finRed);
+                String restantesPart = binario.substring(finRed, finRestantes);
+                String hostPart = binario.substring(finRestantes);
+                
+                sb.append("<div class='subred-line'>");
+                // Parte de red principal (azul)
+                sb.append("<span style='background-color: #e3f2fd'>").append(redPart).append("</span>");
+                // Bits restantes (rojo claro)
+                sb.append("<span style='background-color: #ffebee'> ").append(restantesPart).append(" </span>");
+                // Parte de host (verde claro)
+                sb.append("<span style='background-color: #f1f8e9'>").append(hostPart).append("</span>");
+                
+                // Agregar la IP decimal y máscara
+                sb.append("<b> <-> </b>").append(subred.getIpv4()).append("/").append(prefijo);
+                
+                // Agregar el nombre del host si existe
+                if (subred.getHostAsignado() != null) {
+                    sb.append("<b> ==> </b><span class='badge bg-primary' style='font-size: 0.9em;'>")
+                      .append(subred.getHostAsignado())
+                      .append("</span>");
+                }
+                
+                sb.append("</div><br>");
+            } catch (Exception e) {
+                System.err.println("Error al procesar subred: " + e.getMessage());
+            }
         }
         return sb.toString();
     }

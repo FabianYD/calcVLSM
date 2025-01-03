@@ -57,6 +57,7 @@ public class SvRed extends HttpServlet {
 
             calc.calcular();
 
+            // Guardar los resultados en la sesión
             String redP = calc.getRedPrincipal().getIpv4() + "/" + calc.getRedPrincipal().getPrefijo();
             HttpSession session = request.getSession();
             session.setAttribute("red", redP);

@@ -13,6 +13,7 @@ public class Subred extends Red {
     private String primeraUtilizable;
     private String ultimaUtilizable;
     private String broadcast;
+    private int bitsRestantes;
 
     public Subred(String ipv4, int prefijo, String hostAsignado, String primeraUtilizable, String ultimaUtilizable,
             String broadcast) throws Exception {
@@ -21,6 +22,12 @@ public class Subred extends Red {
         this.primeraUtilizable = primeraUtilizable;
         this.ultimaUtilizable = ultimaUtilizable;
         this.broadcast = broadcast;
+    }
+
+    public Subred(String ipv4, int prefijo, String hostAsignado, String primeraUtilizable, String ultimaUtilizable,
+            String broadcast, int bitsRestantes) throws Exception {
+        this(ipv4, prefijo, hostAsignado, primeraUtilizable, ultimaUtilizable, broadcast);
+        this.bitsRestantes = bitsRestantes;
     }
 
     public String getHostAsignado() {
@@ -37,6 +44,10 @@ public class Subred extends Red {
 
     public String getBroadcast() {
         return broadcast;
+    }
+
+    public int getBitsRestantes() {
+        return bitsRestantes;
     }
 
     @Override
