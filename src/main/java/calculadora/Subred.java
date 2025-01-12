@@ -14,6 +14,7 @@ public class Subred extends Red {
     private String ultimaUtilizable;
     private String broadcast;
     private int bitsRestantes;
+    private String tabulacionHtml;
 
     public Subred(String ipv4, int prefijo, String hostAsignado, String primeraUtilizable, String ultimaUtilizable,
             String broadcast) throws Exception {
@@ -25,9 +26,10 @@ public class Subred extends Red {
     }
 
     public Subred(String ipv4, int prefijo, String hostAsignado, String primeraUtilizable, String ultimaUtilizable,
-            String broadcast, int bitsRestantes) throws Exception {
+            String broadcast, int bitsRestantes, int contTab) throws Exception {
         this(ipv4, prefijo, hostAsignado, primeraUtilizable, ultimaUtilizable, broadcast);
         this.bitsRestantes = bitsRestantes;
+        this.tabulacionHtml = "&nbsp;<span>・</span>&nbsp;".repeat(contTab);
     }
 
     public String getHostAsignado() {
@@ -48,6 +50,14 @@ public class Subred extends Red {
 
     public int getBitsRestantes() {
         return bitsRestantes;
+    }
+
+    public void setTabulacionHtml(String tabulacionHtml) {
+        this.tabulacionHtml = tabulacionHtml;
+    }
+
+    public String getTabulacionHtml() {
+        return tabulacionHtml;
     }
 
     @Override

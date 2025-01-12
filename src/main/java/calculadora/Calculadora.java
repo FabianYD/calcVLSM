@@ -38,8 +38,8 @@ public class Calculadora {
         return subredes;
     }
 
-    private void manejarSubredDuplicada(String ipv4, int prefijo, String hostAsignado,
-            String primeraUsable, String ultimaUsable, String broadcast, Map<Integer, Integer> disponibilidad, int bitsRestantes)
+    private Subred guardarSubred(String ipv4, int prefijo, String hostAsignado,
+            String primeraUsable, String ultimaUsable, String broadcast, Map<Integer, Integer> disponibilidad, int bitsRestantes, int contTab)
             throws Exception {
         // Buscar si existe una subred con la misma IP y prefijo
         for (int i = 0; i < subredes.size(); i++) {
@@ -47,18 +47,20 @@ public class Calculadora {
             if (subred.getIpv4().equals(ipv4) && subred.getPrefijo() == prefijo) {
                 // Si la subred existente no tiene nombre y la nueva sí, reemplazarla
                 if (subred.getHostAsignado() == null && hostAsignado != null) {
-                    subredes.set(i, new Subred(ipv4, prefijo, hostAsignado,
-                            primeraUsable, ultimaUsable, broadcast, bitsRestantes));
+                    Subred aux = new Subred(ipv4, prefijo, hostAsignado,
+                    primeraUsable, ultimaUsable, broadcast, bitsRestantes, contTab);
+                    subredes.set(i, aux);
                     int auxDisp = disponibilidad.get(prefijo);
                     disponibilidad.replace(prefijo, auxDisp - 1);
-
+                    return aux;
                 }
-                return;
             }
         }
         // Si no existe, agregar la nueva subred
-        subredes.add(new Subred(ipv4, prefijo, hostAsignado,
-                primeraUsable, ultimaUsable, broadcast, bitsRestantes));
+        Subred aux = new Subred(ipv4, prefijo, hostAsignado,
+        primeraUsable, ultimaUsable, broadcast, bitsRestantes, contTab);
+        subredes.add(aux);
+        return aux;
     }
 
     public void calcular() throws Exception {
@@ -68,9 +70,10 @@ public class Calculadora {
 
         String direccionActual = redPrincipal.getIpv4Binario();
         int prefijoActual = redPrincipal.getPrefijo();
+        int contTab = -1;
 
         // Crear el array de resultados con el tamaño de hosts
-        resultados = new String[hosts.size()][5];
+        resultados = new String[hosts.size()][6];
 
         for (int i = 0; i < hosts.size(); i++) {
             Host hostActual = hosts.get(i);
@@ -114,8 +117,10 @@ public class Calculadora {
             resultados[i][4] = broadcast;
 
             // Manejar la subred principal
-            manejarSubredDuplicada(direccionRed, mascaraSubred, hostActual.getNombre(),
-                    primeraUsable, ultimaUsable, broadcast, prefijoDisponible, bitsRestantes);
+            contTab = controlaTab(prefijoActual + "", mascaraSubred + "", contTab);
+            Subred subredAsig = guardarSubred(direccionRed, mascaraSubred, hostActual.getNombre(),
+                    primeraUsable, ultimaUsable, broadcast, prefijoDisponible, bitsRestantes, contTab);
+            resultados[i][5] = subredAsig.getMascara();
 
             // Calcular combinaciones posibles
             if (bitsRestantes > 0) {
@@ -130,8 +135,9 @@ public class Calculadora {
                     String direccionFormateada = Convertir.formatearBinario(direccionCompletaBinaria);
                     String direccionIPCombi = Convertir.IPv4(direccionFormateada);
                     // Manejar las subredes combinadas
-                    manejarSubredDuplicada(direccionIPCombi, mascaraSubred, null,
-                            null, null, null, prefijoDisponible, bitsRestantes);
+                    // contTab = controlaTab(prefijoActual + "", mascaraSubred + "", contTab);
+                    guardarSubred(direccionIPCombi, mascaraSubred, null,
+                            null, null, null, prefijoDisponible, bitsRestantes, contTab);
                 }
             }
 
@@ -180,6 +186,7 @@ public class Calculadora {
                 String hostPart = binario.substring(finRestantes);
                 
                 sb.append("<div class='subred-line'>");
+                sb.append(subred.getTabulacionHtml());
                 // Parte de red principal (azul)
                 sb.append("<span style='background-color: #e3f2fd'>").append(redPart).append("</span>");
                 // Bits restantes (rojo claro)
@@ -205,6 +212,21 @@ public class Calculadora {
         return sb.toString();
     }
 
+    private int controlaTab(String prefijoActual, String mascaraSubRed, int cont) {
+        int prefijo = Integer.parseInt(prefijoActual);
+        int mascara = Integer.parseInt(mascaraSubRed);
+        
+        if (prefijo < mascara) {
+            // Si el prefijo es menor, aumentamos el nivel de tabulación
+            return cont + 1;
+        } else if (prefijo > mascara) {
+            // Si el prefijo es mayor, disminuimos el nivel de tabulación
+            return Math.max(0, cont - 1); // Evitamos números negativos
+        }
+        // Si son iguales, mantenemos el mismo nivel
+        return cont;
+    }
+
     public String imprimirHosts() {
         StringBuilder sb = new StringBuilder();
         sb.append("<table class='table table-striped'>");
@@ -228,7 +250,7 @@ public class Calculadora {
         StringBuilder sb = new StringBuilder();
         sb.append("<table class='table table-striped'>");
         sb.append("<thead><tr>");
-        sb.append("<th>Nombre</th><th>Red</th><th>Primera Utilizable</th><th>Última Utilizable</th><th>Broadcast</th>");
+        sb.append("<th>Nombre</th><th>Red</th><th>Primera Utilizable</th><th>Última Utilizable</th><th>Broadcast</th><th>Mascara</th>");
         sb.append("</tr></thead><tbody>");
 
         for (String[] row : resultados) {

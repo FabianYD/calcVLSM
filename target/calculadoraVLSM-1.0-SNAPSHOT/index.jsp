@@ -105,11 +105,18 @@
                 <!-- Resultados Principales -->
                 <div class="col-md-8">
                     <!-- Red Principal -->
-                    <div class="resultado-item red">
-                        <h5>
-                            <i class="bi bi-diagram-2 me-2"></i>
-                            Red Principal
-                        </h5>
+                    <div class="resultado-item">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <h5>
+                                <i class="bi bi-diagram-2 me-2"></i>
+                                Red Principal
+                            </h5>
+                            <form action="SvPDF" method="GET" class="m-0">
+                                <button type="submit" class="btn btn-danger btn-sm">
+                                    <i class="bi bi-file-pdf-fill me-1"></i>Imprimir PDF
+                                </button>
+                            </form>
+                        </div>
                         <div class="resultado-contenido">
                             <h1><%= request.getSession().getAttribute("red") %></h1>
                         </div>
@@ -127,26 +134,9 @@
                     </div>
                     
                     <!-- Procedimiento -->
-                    <div class="resultado-item detalles">
-                            <h5>
-                                <i class="bi bi-list-check me-2"></i>
-                                Procedimiento Detallado
-                            </h5>
-                            <div class="resultado-contenido">
-                            <div class="d-flex gap-3 mb-3">
-                                <div class="d-flex align-items-center">
-                                    <div style="width: 20px; height: 20px; background-color: #e3f2fd; margin-right: 5px;"></div>
-                                    <b>RED</b>
-                                </div>
-                                <div class="d-flex align-items-center">
-                                    <div style="width: 20px; height: 20px; background-color: #ffebee; margin-right: 5px;"></div>
-                                    <b>SUBRED</b>
-                                </div>
-                                <div class="d-flex align-items-center">
-                                    <div style="width: 20px; height: 20px; background-color: #f1f8e9; margin-right: 5px;"></div>
-                                    <b>HOST</b>
-                                </div>
-                            </div>
+                    <div class="card mt-3">
+                        <div class="card-body">
+                            <h5 class="card-title mb-3">Procedimiento detallado</h5>
                             <div id="procedimiento">
                                 <%= request.getSession().getAttribute("subredes") %>
                             </div>
