@@ -48,12 +48,13 @@ public class Calculadora {
                 // Si la subred existente no tiene nombre y la nueva sí, reemplazarla
                 if (subred.getHostAsignado() == null && hostAsignado != null) {
                     Subred aux = new Subred(ipv4, prefijo, hostAsignado,
-                    primeraUsable, ultimaUsable, broadcast, bitsRestantes, contTab);
+                    primeraUsable, ultimaUsable, broadcast, subred.getBitsRestantes(), contTab);  // Mantenemos los bits restantes originales
                     subredes.set(i, aux);
                     int auxDisp = disponibilidad.get(prefijo);
                     disponibilidad.replace(prefijo, auxDisp - 1);
                     return aux;
                 }
+                return subred;  // Si ya existe la subred, la retornamos sin modificar
             }
         }
         // Si no existe, agregar la nueva subred
@@ -81,6 +82,7 @@ public class Calculadora {
             int mascaraSubred = 32 - bitsHost;
             int bitsRestantes = mascaraSubred - prefijoActual;
             int numSubredesPosibles = (int) Math.pow(2, bitsRestantes);
+            System.out.println(hostActual.getNombre() + " " +prefijoActual);
 
             // agregar mascaraSubred y disponibilidad numSubredesPosibles en MAP
             prefijoDisponible.put(mascaraSubred, numSubredesPosibles - 1);
@@ -173,17 +175,35 @@ public class Calculadora {
         for (Subred subred : subredes) {
             try {
                 String binario = Convertir.Binario(subred.getIpv4());
+                binario = Convertir.formatearBinario(binario);
                 int prefijo = subred.getPrefijo();
                 int bitsRestantes = subred.getBitsRestantes();
+                int finRed = prefijo - bitsRestantes;
+
+                //formateamos el binario
+                String redPart = "";
+                String restantesPart = "";
+                String hostPart = "";
+                int cont = 0;
+                // Encontrar la posición del fin de red
+                for(int i = 0; i < binario.length(); i++) {
+                    if(binario.charAt(i) != '.') {
+                        if(cont == finRed) {
+                            // posFinRed = i;
+                            redPart = binario.substring(0, i);
+                        }
+                        if(cont == prefijo) {
+                            restantesPart = binario.substring(redPart.length(), i);
+                            // posPrefijo = i;
+                            hostPart = binario.substring(i);
+                            break;
+                        }
+                        cont++;
+                    }
+                }
                 
-                // Dividir el binario en tres partes
-                int inicioRed = 0;
-                int finRed = prefijo - bitsRestantes;  // Fin de la parte de red principal
-                int finRestantes = prefijo;            // Fin de los bits restantes
+                // Dividir la cadena usando substring
                 
-                String redPart = binario.substring(inicioRed, finRed);
-                String restantesPart = binario.substring(finRed, finRestantes);
-                String hostPart = binario.substring(finRestantes);
                 
                 sb.append("<div class='subred-line'>");
                 sb.append(subred.getTabulacionHtml());
