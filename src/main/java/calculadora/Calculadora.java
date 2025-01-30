@@ -20,7 +20,7 @@ public class Calculadora {
     private String[][] resultados;
     private Map<Integer, Integer> prefijoDisponible;
 
-    public Calculadora(String direccionBase, int mascaraBase) throws Exception {
+    public Calculadora(String direccionBase, int mascaraBase) {
         this.redPrincipal = new Red(direccionBase, mascaraBase);
         this.hosts = new ArrayList<>();
         this.subredes = new ArrayList<>();
@@ -38,40 +38,17 @@ public class Calculadora {
         return subredes;
     }
 
-    private Subred guardarSubred(String ipv4, int prefijo, String hostAsignado,
-            String primeraUsable, String ultimaUsable, String broadcast, Map<Integer, Integer> disponibilidad, int bitsRestantes, int contTab)
-            throws Exception {
-        // Buscar si existe una subred con la misma IP y prefijo
-        for (int i = 0; i < subredes.size(); i++) {
-            Subred subred = subredes.get(i);
-            if (subred.getIpv4().equals(ipv4) && subred.getPrefijo() == prefijo) {
-                // Si la subred existente no tiene nombre y la nueva sí, reemplazarla
-                if (subred.getHostAsignado() == null && hostAsignado != null) {
-                    Subred aux = new Subred(ipv4, prefijo, hostAsignado,
-                    primeraUsable, ultimaUsable, broadcast, subred.getBitsRestantes(), contTab);  // Mantenemos los bits restantes originales
-                    subredes.set(i, aux);
-                    int auxDisp = disponibilidad.get(prefijo);
-                    disponibilidad.replace(prefijo, auxDisp - 1);
-                    return aux;
-                }
-                return subred;  // Si ya existe la subred, la retornamos sin modificar
-            }
-        }
-        // Si no existe, agregar la nueva subred
-        Subred aux = new Subred(ipv4, prefijo, hostAsignado,
-        primeraUsable, ultimaUsable, broadcast, bitsRestantes, contTab);
-        subredes.add(aux);
-        return aux;
-    }
-
-    public void calcular() throws Exception {
+    public void calcular(){
         prefijoDisponible = new HashMap<>();
         // Ordenar hosts de mayor a menor
         hosts.sort((a, b) -> b.getNumHost() - a.getNumHost());
 
+        // Validar si hay suficiente espacio para todos los hosts
+        validarEspacioDisponible(redPrincipal.getPrefijo(), hosts);
+
         String direccionActual = redPrincipal.getIpv4Binario();
         int prefijoActual = redPrincipal.getPrefijo();
-        int contTab = -1;
+        int contTab = 0;
 
         // Crear el array de resultados con el tamaño de hosts
         resultados = new String[hosts.size()][6];
@@ -144,7 +121,8 @@ public class Calculadora {
             }
 
             // Actualizar para la siguiente iteración
-            if (prefijoDisponible.get(mascaraSubred) == -1) {
+            Integer disponibilidad = prefijoDisponible.get(mascaraSubred);
+            if (disponibilidad != null && disponibilidad == -1) {
                 prefijoDisponible.remove(mascaraSubred);
                 prefijoActual = mascaraSubred - 1;
             } else {
@@ -156,6 +134,46 @@ public class Calculadora {
         // Ordenar subredes usando la representación binaria
         subredes.sort((a, b) -> Convertir.Binario(a.getIpv4()).compareTo(Convertir.Binario(b.getIpv4())));
         // return resultados;
+    }
+
+    private Subred guardarSubred(String ipv4, int prefijo, String hostAsignado,
+            String primeraUsable, String ultimaUsable, String broadcast, Map<Integer, Integer> disponibilidad, int bitsRestantes, int contTab) {
+        // Buscar si existe una subred con la misma IP y prefijo
+        for (int i = 0; i < subredes.size(); i++) {
+            Subred subred = subredes.get(i);
+            if (subred.getIpv4().equals(ipv4) && subred.getPrefijo() == prefijo) {
+                // Si la subred existente no tiene nombre y la nueva sí, reemplazarla
+                if (subred.getHostAsignado() == null && hostAsignado != null) {
+                    Subred aux = new Subred(ipv4, prefijo, hostAsignado,
+                    primeraUsable, ultimaUsable, broadcast, subred.getBitsRestantes(), contTab);  // Mantenemos los bits restantes originales
+                    subredes.set(i, aux);
+                    int auxDisp = disponibilidad.get(prefijo);
+                    disponibilidad.replace(prefijo, auxDisp - 1);
+                    return aux;
+                }
+                return subred;  // Si ya existe la subred, la retornamos sin modificar
+            }
+        }
+        // Si no existe, agregar la nueva subred
+        Subred aux = new Subred(ipv4, prefijo, hostAsignado,
+        primeraUsable, ultimaUsable, broadcast, bitsRestantes, contTab);
+        subredes.add(aux);
+        return aux;
+    }
+
+    private void validarEspacioDisponible(int prefijoRed, List<Host> hostsValidar) {
+        int totalBitsNecesarios = 0;
+        for (Host host : hostsValidar) {
+            totalBitsNecesarios += Math.pow(2, host.getPotencia());
+        }
+        
+        int bitsDisponibles = 32 - prefijoRed;
+        bitsDisponibles = (int)Math.pow(2, bitsDisponibles);
+        if (totalBitsNecesarios > bitsDisponibles) {
+            throw new IllegalArgumentException(
+                "No hay suficiente espacio para todos los hosts solicitados."
+            );
+        }
     }
 
     private String incrementarBinario(String binario) {
@@ -225,7 +243,7 @@ public class Calculadora {
                 }
                 
                 sb.append("</div><br>");
-            } catch (Exception e) {
+            } catch (IllegalArgumentException e) {
                 System.err.println("Error al procesar subred: " + e.getMessage());
             }
         }

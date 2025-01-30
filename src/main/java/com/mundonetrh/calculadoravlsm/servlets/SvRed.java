@@ -43,6 +43,11 @@ public class SvRed extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
+        // Limpiar la sesión existente
+        HttpSession session = request.getSession();
+        session.invalidate();
+        session = request.getSession(true);
+
         try {
             // Obtener dirección base y máscara
             String direccionBase = request.getParameter("direccionBase");
@@ -59,7 +64,6 @@ public class SvRed extends HttpServlet {
 
             // Guardar los resultados en la sesión
             String redP = calc.getRedPrincipal().getIpv4() + "/" + calc.getRedPrincipal().getPrefijo();
-            HttpSession session = request.getSession();
             session.setAttribute("red", redP);
             session.setAttribute("subredes", calc.imprimirSubredes());
             session.setAttribute("resultados", calc.verResultados());
@@ -67,10 +71,11 @@ public class SvRed extends HttpServlet {
 
             response.sendRedirect("index.jsp");
             
-        } catch (Exception e) {
-            // Manejar errores
-            System.out.println("Error al procesar la solicitud: " + e.getMessage());
-            response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Error en los datos proporcionados");
+        } catch (IllegalArgumentException e) {
+            // Guardar el mensaje de error en la sesión
+            session.setAttribute("error", e.getMessage());
+            // Redirigir a la página principal
+            response.sendRedirect("index.jsp");
         }
     }
 

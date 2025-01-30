@@ -14,6 +14,9 @@ public class Host {
     private int potencia;
 
     public Host(String nombre, int numHost) {
+        if(numHost <= 0){
+            throw new IllegalArgumentException("El número de hosts debe ser mayor que 0");
+        }
         this.nombre = nombre;
         this.numHost = numHost;
         this.potencia = calcularPotencia();

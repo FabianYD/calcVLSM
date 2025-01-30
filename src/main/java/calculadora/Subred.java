@@ -17,7 +17,7 @@ public class Subred extends Red {
     private String tabulacionHtml;
 
     public Subred(String ipv4, int prefijo, String hostAsignado, String primeraUtilizable, String ultimaUtilizable,
-            String broadcast) throws Exception {
+            String broadcast){
         super(ipv4, prefijo);
         this.hostAsignado = hostAsignado;
         this.primeraUtilizable = primeraUtilizable;
@@ -26,7 +26,7 @@ public class Subred extends Red {
     }
 
     public Subred(String ipv4, int prefijo, String hostAsignado, String primeraUtilizable, String ultimaUtilizable,
-            String broadcast, int bitsRestantes, int contTab) throws Exception {
+            String broadcast, int bitsRestantes, int contTab) {
         this(ipv4, prefijo, hostAsignado, primeraUtilizable, ultimaUtilizable, broadcast);
         this.bitsRestantes = bitsRestantes;
         this.tabulacionHtml = "&nbsp;<span>・</span>&nbsp;".repeat(contTab);
